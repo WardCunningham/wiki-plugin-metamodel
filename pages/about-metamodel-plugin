@@ -1,0 +1,37 @@
+{
+  "title": "About Metamodel Plugin",
+  "story": [
+  {
+    "type": "paragraph",
+    "id": "5303b6351250cddd",
+    "text": "Here we describe the purpose of the plugin and include a sample."
+  },
+  {
+    "type": "metamodel",
+    "id": "ef919ea7565b0528",
+    "text": "This is text in the new plugin. You can *double-click* to edit it too."
+  }
+],
+  "journal": [
+  {
+    "type": "create",
+    "item": {
+      "title": "About Metamodel Plugin",
+      "story": [
+  {
+    "type": "paragraph",
+    "id": "5303b6351250cddd",
+    "text": "Here we describe the purpose of the plugin and include a sample."
+  },
+  {
+    "type": "metamodel",
+    "id": "ef919ea7565b0528",
+    "text": "This is text in the new plugin. You can *double-click* to edit it too."
+  }
+]
+    },
+    "date": 1519167624000,
+    "certificate": "from mkplugin.sh"
+  }
+]
+}

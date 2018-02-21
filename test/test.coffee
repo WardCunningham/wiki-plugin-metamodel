@@ -6,8 +6,16 @@ expect = require 'expect.js'
 
 describe 'metamodel plugin', ->
 
-  describe 'expand', ->
+  describe 'parse', ->
 
-    # it 'can make itallic', ->
-    #   result = metamodel.expand 'hello *world*'
-    #   expect(result).to.be 'hello <i>world</i>'
+    it 'sees indent', ->
+      result = metamodel.parse '[]\n  []'
+      expect(result[1].in).to.equal 1
+
+  describe 'run', ->
+
+    it 'reports size of array in array', ->
+      data = [['foo','bar']]
+      parse = metamodel.parse '[]\n  []'
+      result = metamodel.run data, parse
+      expect(result[1].hover).to.equal '2 elements'

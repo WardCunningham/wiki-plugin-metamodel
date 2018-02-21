@@ -13,15 +13,16 @@ parse = (text) ->
       num: num
       in: m[1].length/2
       line: m[2]
-  console.log 'steps',steps
   steps
 
-run = ($item, steps) ->
+run = (data, steps) ->
   nodes = {}
   rels = {}
 
-  spec = (num,data) ->
-    return unless data?
+  spec = (num, data) ->
+    return unless steps[num]?
+    return steps[num].error = 'out of data' unless data?
+    console.log 'spec: num', num, 'line', steps[num].line #, 'data',data
     step = steps[num]
     if step.line.match /^\[ *\] *(.*)$/
       return step.error = "no array here" unless data.length?
@@ -30,21 +31,12 @@ run = ($item, steps) ->
         spec num+1, d
     else if step.line.match /^\{ *\} *(.*)$/
       step.hover = "hash"
-      while true
-        num += 1
-        return unless steps[num]?.in > step.in
+      while steps[++num]?.in > step.in
         spec num, data
     else
       step.error = 'want [ ] or { }'
 
-  source = $item.parents('.page').find('.json:first')
-  unless source.length
-    steps[0].error = 'page has no json'
-  else unless (data = source.data('item')['resource'])?
-    steps[0].error = 'json has no data'
-  else
-    spec 0, data
-
+  spec 0, data
   steps
 
 report = (steps) ->
@@ -58,9 +50,22 @@ report = (steps) ->
   lines.join "<br>"
 
 emit = ($item, item) ->
+  data = null
+
+  resource = (steps) ->
+    source = $item.parents('.page').find('.json:first')
+    unless source.length
+      steps[0].error = 'page has no json'
+    else unless (data = source.data('item')['resource'])?
+      steps[0].error = 'json has no data'
+
+  steps = parse item.text
+  resource steps
+  run data, steps
+
   $item.append """
     <p style="background-color:#eee;padding:15px;">
-      #{report run $item, parse item.text}
+      #{report steps}
     </p>
   """
 
@@ -68,5 +73,5 @@ bind = ($item, item) ->
   $item.dblclick -> wiki.textEditor $item, item
 
 window.plugins.metamodel = {emit, bind} if window?
-module.exports = {expand} if module?
+module.exports = {parse, run} if module?
 

@@ -8,6 +8,6 @@ describe 'metamodel plugin', ->
 
   describe 'expand', ->
 
-    it 'can make itallic', ->
-      result = metamodel.expand 'hello *world*'
-      expect(result).to.be 'hello <i>world</i>'
+    # it 'can make itallic', ->
+    #   result = metamodel.expand 'hello *world*'
+    #   expect(result).to.be 'hello <i>world</i>'

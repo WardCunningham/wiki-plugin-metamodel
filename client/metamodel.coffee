@@ -22,7 +22,7 @@ run = (data, steps) ->
   spec = (num, data) ->
     return unless steps[num]?
     return steps[num].error = 'out of data' unless data?
-    console.log 'spec: num', num, 'line', steps[num].line #, 'data',data
+    # console.log 'spec: num', num, 'line', steps[num].line, 'data',data
     step = steps[num]
     if step.line.match /^\[ *\] *(.*)$/
       return step.error = "no array here" unless data.length?

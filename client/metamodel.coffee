@@ -31,12 +31,21 @@ run = (data, steps) ->
         spec num+1, d
     else if step.line.match /^\{ *\} *(.*)$/
       step.hover = "hash"
-      while steps[++num]?.in > step.in
-        spec num, data
+      if m = step.line.match /\bNODE\s+(\w+)/
+        node = {type:m[1]}
+        while (field = steps[++num])?.in > step.in
+          if field.line.match /^\w+$/
+            field.hover = node[field.line] = data[field.line] if data[field.line]?
+          else
+            field.error = 'complex field'
+        nodes[node.name] = node
+      else
+        field.error = 'expected NODE'
     else
       step.error = 'want [ ] or { }'
 
   spec 0, data
+  console.log 'nodes', nodes, 'rels', rels
   steps
 
 report = (steps) ->

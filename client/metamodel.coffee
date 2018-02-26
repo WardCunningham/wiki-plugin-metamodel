@@ -31,16 +31,20 @@ run = (data, steps) ->
         spec num+1, d
     else if step.line.match /^\{ *\} *(.*)$/
       step.hover = "hash"
-      if m = step.line.match /\bNODE\s+(\w+)/
-        node = {type:m[1]}
+      if m = step.line.match /\b(NODE|REL)\s+(\w+)/
+        node = {type:m[2]}
         while (field = steps[++num])?.in > step.in
           if field.line.match /^\w+$/
-            field.hover = node[field.line] = data[field.line] if data[field.line]?
+            if data[field.line]?
+              eg = node[field.line] = data[field.line]
+              field.count||=0
+              field.count++
+              field.hover = "#{field.count} found, last:\n#{eg}"
           else
             field.error = 'complex field'
         nodes[node.name] = node
       else
-        field.error = 'expected NODE'
+        step.error = 'expected NODE or REL'
     else
       step.error = 'want [ ] or { }'
 

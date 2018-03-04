@@ -37,36 +37,39 @@ run = (data, steps) ->
       step.hover = "hash"
       if m = step.line.match /\b(NODE|REL)\s+(\w+)/
         step.node = {type:m[2]}
-        while (field = steps[++num])?.in > step.in
-          if field.line.match /^(\w+)$/
-            if data[field.line]?
-              eg = step.node[field.line] = data[field.line]
-              count field
-              field.hover = "#{field.count} found, last:\n#{eg}"
-          else if m = field.line.match /^(\w+) NAME$/
-            console.log 'NAME', data
-            if data[m[1]]?
-              eg = step.node[m[1]] = data[m[1]]
-              count field
-              field.hover = "#{field.count} NAME found, last:\n#{eg}"
-              step.node.name = eg
-          else if m = field.line.match /^(\w+) (=>|<=) NODE (\w+) (\w+)$/
-            if data[m[1]]?
-              eg = step.node[m[1]] = data[m[1]]
-              count field
-              out = m[2] == '=>'
-              dir = if out then '⇒' else '⇐'
-              field.hover = "#{field.count} found, last:\n#{dir} #{m[3]}{#{m[4]}: #{eg}}"
-              here = rels[m[1].toUpperCase()] ||= []
-              here.push {from: step.node.name, to: eg}
-          else
-            field.error = 'field too complex'
+        while (steps[++num])?.in > step.in
+          field step, steps[num], data
         here = nodes[step.node.type.toUpperCase()] ||= {}
         here[step.node.name] = step.node
+        step.hover = JSON.stringify(step.node,null,' ').replace(/"/g,'')
       else
         step.error = 'expected NODE or REL'
     else
       step.error = 'want [ ] or { }'
+
+  field = (step, field, data) ->
+    if m = field.line.match /^(\w+)$/
+      if data[m[1]]?
+        eg = step.node[m[1]] = data[m[1]]
+        count field
+        field.hover = "#{field.count} found, last:\n#{eg}"
+    else if m = field.line.match /^(\w+) NAME$/
+      if data[m[1]]?
+        eg = step.node[m[1]] = data[m[1]]
+        count field
+        field.hover = "#{field.count} NAME found, last:\n#{eg}"
+        step.node.name = eg
+    else if m = field.line.match /^(\w+) (=>|<=) NODE (\w+) (\w+)$/
+      if data[m[1]]?
+        eg = step.node[m[1]] = data[m[1]]
+        count field
+        out = m[2] == '=>'
+        dir = if out then '⇒' else '⇐'
+        field.hover = "#{field.count} found, last:\n#{dir} #{m[3]}{#{m[4]}: #{eg}}"
+        here = rels[m[1].toUpperCase()] ||= []
+        here.push {from: step.node.name, to: eg}
+    else
+      field.error = 'field too complex'
 
   spec 0, data
   console.log 'nodes', nodes, 'rels', rels

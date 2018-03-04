@@ -35,17 +35,25 @@ run = (data, steps) ->
         spec num+1, d
     else if step.line.match /^\{ *\} *(.*)$/
       step.hover = "hash"
-      if m = step.line.match /\b(NODE|REL)\s+(\w+)/
-        step.node = {type:m[2]}
-        while (steps[++num])?.in > step.in
-          field step, steps[num], data
-        here = nodes[step.node.type.toUpperCase()] ||= {}
-        here[step.node.name] = step.node
-        step.hover = JSON.stringify(step.node,null,' ').replace(/"/g,'')
+      if m = step.line.match /(NODE|REL) (\w+)/
+        reify num, data, m[2]
+      else if m = step.line.match /(\w+) (NODE|REL)/
+        if data[m[1]]?
+          reify num, data, data[m[1]]
       else
         step.error = 'expected NODE or REL'
     else
       step.error = 'want [ ] or { }'
+
+  reify = (num, data, type) ->
+    step = steps[num]
+    step.node = {type}
+    while (steps[++num])?.in > step.in
+      field step, steps[num], data
+    here = nodes[step.node.type.toUpperCase()] ||= {}
+    here[step.node.name] = step.node
+    step.hover = JSON.stringify(step.node,null,' ').replace(/"/g,'')
+
 
   field = (step, field, data) ->
     if m = field.line.match /^(\w+)$/

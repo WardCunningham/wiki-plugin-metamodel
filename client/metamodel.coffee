@@ -5,6 +5,9 @@ expand = (text)->
     .replace /</g, '&lt;'
     .replace />/g, '&gt;'
 
+stringify = (obj) ->
+  expand JSON.stringify(obj, null, ' ').replace(/"/g,'')
+
 parse = (text) ->
   steps = []
   for num, line of text.split /\r?\n/
@@ -48,12 +51,10 @@ run = (data, steps) ->
   reify = (num, data, type) ->
     step = steps[num]
     step.node = {type}
-    while (steps[++num])?.in > step.in
-      field step, steps[num], data
+    fields num, step.in, step, data
     here = nodes[step.node.type.toUpperCase()] ||= {}
     here[step.node.name] = step.node
-    step.hover = JSON.stringify(step.node,null,' ').replace(/"/g,'')
-
+    step.hover = "node #{stringify step.node}"
 
   field = (step, field, data) ->
     if m = field.line.match /^(\w+)$/
@@ -78,6 +79,16 @@ run = (data, steps) ->
         here.push {from: step.node.name, to: eg}
     else
       field.error = 'field too complex'
+
+  fields = (num, indent, step, data) ->
+    while (afield = steps[++num])?.in > indent
+      if m = afield.line.match /^CASE (\w+) (\w+)$/
+        if (eg = data[m[1]])? and eg == m[2]
+          count afield
+          afield.hover = "#{afield.count} found, last: data #{stringify data}"
+          fields num, afield.in, step, data
+      else
+        field step, steps[num], data
 
   spec 0, data
   console.log 'nodes', nodes, 'rels', rels
